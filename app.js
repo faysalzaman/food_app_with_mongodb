@@ -10,25 +10,24 @@ import userRoutes from "./routes/users.js";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3010;
 
-// middleware to parse incoming requests
+// Middleware to parse incoming requests
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// To serve files statically
+// Serve files statically
 app.use("/uploads", express.static("uploads"));
 
 // Routes
 app.use("/api/user", userRoutes);
 
-// Error Handling
+// Error Handling for 404 Not Found
 app.use((req, res, next) => {
   const error = new CustomError(`No route found for ${req.originalUrl}`);
   error.statusCode = 404;
   next(error);
 });
-//
+
 // General error handler
 app.use((error, req, res, next) => {
   console.error(error);
@@ -42,33 +41,21 @@ app.use((error, req, res, next) => {
   res.status(status).json(response(status, success, message, data));
 });
 
-module.exports = async (req, res) => {
+// MongoDB connection and handling requests
+export default async (req, res) => {
   try {
-    const mongoConnect = await mongoose.connect(process.env.MONGO_DRIVER, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    if (mongoConnect) {
+    // Check if there's an active connection to MongoDB
+    if (!mongoose.connection.readyState) {
+      await mongoose.connect(process.env.MONGO_DRIVER, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      });
       console.log("Connected to MongoDB");
     }
+    // Pass the request and response to the Express app
+    app(req, res);
   } catch (error) {
     console.error("Failed to connect to MongoDB", error);
+    res.status(500).json({ error: "Failed to connect to database" });
   }
 };
-
-// Start the server and connect to MongoDB
-// app.listen(PORT, async () => {
-//   try {
-//     const mongoConnect = await mongoose.connect(process.env.MONGO_DRIVER, {
-//       useNewUrlParser: true,
-//       useUnifiedTopology: true,
-//     });
-//     if (mongoConnect) {
-//       console.log("Connected to MongoDB");
-//     }
-//   } catch (error) {
-//     console.error("Failed to connect to MongoDB", error);
-//   }
-// });
-
-export default app;
