@@ -42,8 +42,7 @@ app.use((error, req, res, next) => {
   res.status(status).json(response(status, success, message, data));
 });
 
-// Start the server and connect to MongoDB
-app.listen(PORT, async () => {
+module.exports = async (req, res) => {
   try {
     const mongoConnect = await mongoose.connect(process.env.MONGO_DRIVER, {
       useNewUrlParser: true,
@@ -55,4 +54,21 @@ app.listen(PORT, async () => {
   } catch (error) {
     console.error("Failed to connect to MongoDB", error);
   }
-});
+};
+
+// Start the server and connect to MongoDB
+// app.listen(PORT, async () => {
+//   try {
+//     const mongoConnect = await mongoose.connect(process.env.MONGO_DRIVER, {
+//       useNewUrlParser: true,
+//       useUnifiedTopology: true,
+//     });
+//     if (mongoConnect) {
+//       console.log("Connected to MongoDB");
+//     }
+//   } catch (error) {
+//     console.error("Failed to connect to MongoDB", error);
+//   }
+// });
+
+export default app;
