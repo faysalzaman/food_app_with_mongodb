@@ -28,7 +28,7 @@ app.use((req, res, next) => {
   error.statusCode = 404;
   next(error);
 });
-
+//
 // General error handler
 app.use((error, req, res, next) => {
   console.error(error);
