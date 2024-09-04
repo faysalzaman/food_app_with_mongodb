@@ -19,9 +19,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "I am new!",
   },
-  //   profileImage: {
-  //     type: String,
-  //   },
+  profileImage: {
+    default: null,
+    type: String,
+    required: false,
+  },
 });
 
 export default mongoose.model("User", userSchema);

@@ -69,3 +69,62 @@ export const login = async (req, res, next) => {
     next(error);
   }
 };
+
+export const updateUser = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const { name, email, password, status } = req.body;
+
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new CustomError("User not found", 404);
+    }
+
+    // Update user fields if they are provided
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (status) user.status = status;
+
+    // If password is being updated, hash it before saving
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 12);
+      user.password = hashedPassword;
+    }
+
+    await user.save();
+
+    res.status(200).json(
+      response(200, true, "User updated successfully", {
+        userId: user._id,
+        name: user.name,
+        email: user.email,
+        status: user.status,
+      })
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteUser = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new CustomError("User not found", 404);
+    }
+
+    await user.remove();
+
+    res.status(200).json(
+      response(200, true, "User deleted successfully", {
+        userId: user._id,
+      })
+    );
+  } catch (error) {
+    next(error);
+  }
+};

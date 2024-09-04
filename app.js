@@ -7,6 +7,9 @@ import CustomError from "./utils/error.js";
 import response from "./utils/response.js";
 import userRoutes from "./routes/users.js";
 
+import categoryRoutes from "./routes/category.js";
+import foodRoutes from "./routes/food.js";
+
 dotenv.config();
 
 const app = express();
@@ -20,6 +23,8 @@ app.use("/uploads", express.static("uploads"));
 
 // Routes
 app.use("/api/user", userRoutes);
+app.use("/api/food", foodRoutes);
+app.use("/api/category", categoryRoutes);
 
 // Error Handling for 404 Not Found
 app.use((req, res, next) => {
@@ -41,18 +46,31 @@ app.use((error, req, res, next) => {
   res.status(status).json(response(status, success, message, data));
 });
 
+const PORT = process.env.PORT || 3010;
+app.listen(PORT, async () => {
+  console.log(`Server is running on port ${PORT}`);
+  await mongoose.connect(process.env.MONGO_DRIVER, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+  });
+  console.log("Connected to MongoDB");
+});
+
 // MongoDB connection and handling requests
 export default async (req, res) => {
   try {
     // Check if there's an active connection to MongoDB
+
     if (!mongoose.connection.readyState) {
       await mongoose.connect(process.env.MONGO_DRIVER, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
+        serverSelectionTimeoutMS: 5000,
       });
       console.log("Connected to MongoDB");
     }
-    // Pass the request and response to the Express app
+
     app(req, res);
   } catch (error) {
     console.error("Failed to connect to MongoDB", error);
