@@ -70,7 +70,7 @@ export const getAllFoodItems = async (req, res, next) => {
   }
 };
 
-// Get Food Item by ID
+// Get Food Item by Id
 export const getFoodItemById = async (req, res, next) => {
   try {
     const { foodId } = req.params;
