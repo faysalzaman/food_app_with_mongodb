@@ -1,9 +1,9 @@
+import cors from "cors";
+
 import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-
-import cors from "cors";
 
 import CustomError from "./utils/error.js";
 import response from "./utils/response.js";
