@@ -70,6 +70,19 @@ export const login = async (req, res, next) => {
   }
 };
 
+// get all the user;
+export const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find();
+
+    res
+      .status(200)
+      .json(response(200, true, "Users retrieved successfully", users));
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateUser = async (req, res, next) => {
   try {
     const { userId } = req.params;

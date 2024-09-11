@@ -3,6 +3,8 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
+import cors from "cors";
+
 import CustomError from "./utils/error.js";
 import response from "./utils/response.js";
 import userRoutes from "./routes/users.js";
@@ -13,6 +15,9 @@ import foodRoutes from "./routes/food.js";
 dotenv.config();
 
 const app = express();
+
+// Middleware to handle CORS
+app.use(cors());
 
 // Middleware to parse incoming requests
 app.use(bodyParser.json());

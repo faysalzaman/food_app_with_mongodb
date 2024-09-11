@@ -1,27 +1,41 @@
 import FoodItem from "../models/food.js";
 import CustomError from "../utils/error.js";
 import response from "../utils/response.js";
-
 import Category from "../models/category.js";
 
 // Create Food Item
 export const createFoodItem = async (req, res, next) => {
   try {
-    const { name, description, price, category, type, imageUrl, available } =
-      req.body;
+    const {
+      name,
+      description,
+      price,
+      category,
+      type,
+      imageUrl,
+      available,
+      isVegetarian,
+    } = req.body;
 
-    if (!name || !description || !price || !category || !type) {
-      throw new CustomError("Please provide all required fields", 400);
+    if (
+      !name ||
+      !description ||
+      !price ||
+      !category ||
+      !type ||
+      isVegetarian === undefined
+    ) {
+      throw new CustomError(
+        "Please provide all required fields including vegetarian status",
+        400
+      );
     }
 
-    // check whether this category exists in the database, if not, throw an error
+    // Check whether this category exists in the database, if not, throw an error
     const categoryExists = await Category.findById(category);
     if (!categoryExists) {
       throw new CustomError("Category not found", 404);
     }
-
-    // the category must be present in the database before creating a food item
-    // if the category is not present, the food item cannot be created
 
     // Check if the food item already exists with the same name in the same category
     const foodItemExists = await FoodItem.findOne({
@@ -43,6 +57,7 @@ export const createFoodItem = async (req, res, next) => {
       type,
       imageUrl,
       available,
+      isVegetarian,
     });
 
     await foodItem.save();
@@ -93,8 +108,16 @@ export const getFoodItemById = async (req, res, next) => {
 export const updateFoodItem = async (req, res, next) => {
   try {
     const { foodId } = req.params;
-    const { name, description, price, category, type, imageUrl, available } =
-      req.body;
+    const {
+      name,
+      description,
+      price,
+      category,
+      type,
+      imageUrl,
+      available,
+      isVegetarian,
+    } = req.body;
 
     const foodItem = await FoodItem.findById(foodId);
 
@@ -110,6 +133,7 @@ export const updateFoodItem = async (req, res, next) => {
     if (type) foodItem.type = type;
     if (imageUrl) foodItem.imageUrl = imageUrl;
     if (available !== undefined) foodItem.available = available;
+    if (isVegetarian !== undefined) foodItem.isVegetarian = isVegetarian;
 
     foodItem.updatedAt = Date.now();
 
