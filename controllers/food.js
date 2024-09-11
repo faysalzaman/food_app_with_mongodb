@@ -152,13 +152,12 @@ export const deleteFoodItem = async (req, res, next) => {
   try {
     const { foodId } = req.params;
 
-    const foodItem = await FoodItem.findById(foodId);
+    // Find and delete the food item
+    const foodItem = await FoodItem.findByIdAndDelete(foodId);
 
     if (!foodItem) {
       throw new CustomError("Food item not found", 404);
     }
-
-    await foodItem.remove();
 
     res.status(200).json(
       response(200, true, "Food item deleted successfully", {

@@ -95,13 +95,12 @@ export const deleteCategory = async (req, res, next) => {
   try {
     const { categoryId } = req.params;
 
-    const category = await Category.findById(categoryId);
+    // Find and delete the category
+    const category = await Category.findByIdAndDelete(categoryId);
 
     if (!category) {
       throw new CustomError("Category not found", 404);
     }
-
-    await category.remove();
 
     res.status(200).json(
       response(200, true, "Category deleted successfully", {
