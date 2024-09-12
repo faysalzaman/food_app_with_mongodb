@@ -16,7 +16,7 @@ dotenv.config();
 
 const app = express();
 
-// Middleware to handle CORS
+// Middleware to handle CORS.
 app.use(cors());
 
 // Middleware to parse incoming requests
