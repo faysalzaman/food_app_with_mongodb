@@ -7,7 +7,7 @@ import JWT from "../utils/jwt.js";
 
 export const createUser = async (req, res, next) => {
   try {
-    const { name, email, password, status } = req.body;
+    const { name, email, password, bio } = req.body;
 
     // Access the uploaded file (if any)
     const imageFile = req.file;
@@ -31,7 +31,7 @@ export const createUser = async (req, res, next) => {
       name,
       email,
       password: hashedPassword,
-      status,
+      bio,
       image: imageFile ? imageFile.path : null, // Save image path
     });
 
@@ -43,7 +43,7 @@ export const createUser = async (req, res, next) => {
       response(201, true, "User created successfully", {
         name,
         email,
-        status,
+        bio,
         image: imageFile ? imageFile.path : null, // Include image path in response
       })
     );
