@@ -5,6 +5,8 @@ import response from "../utils/response.js";
 import CustomError from "../utils/error.js";
 import JWT from "../utils/jwt.js";
 
+import { v2 as cloudinary } from "cloudinary";
+
 export const createUser = async (req, res, next) => {
   try {
     const { name, email, password, bio } = req.body;
@@ -97,7 +99,10 @@ export const getAllUsers = async (req, res, next) => {
 export const updateUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const { name, email, password, status } = req.body;
+    const { name, email, password, bio } = req.body;
+
+    // Access the uploaded file (if any)
+    const imageFile = req.file;
 
     // Find the user
     const user = await User.findById(userId);
@@ -108,7 +113,7 @@ export const updateUser = async (req, res, next) => {
     // Update user fields if they are provided
     if (name) user.name = name;
     if (email) user.email = email;
-    if (status) user.status = status;
+    if (bio) user.bio = bio;
 
     // If password is being updated, hash it before saving
     if (password) {
@@ -116,6 +121,24 @@ export const updateUser = async (req, res, next) => {
       user.password = hashedPassword;
     }
 
+    // If there's a new image file, delete the old one from Cloudinary and upload the new one
+    if (imageFile) {
+      if (user.profileImagePublicId) {
+        // Delete old image from Cloudinary
+        await cloudinary.uploader.destroy(user.profileImagePublicId);
+      }
+
+      // Upload new image to Cloudinary
+      const result = await cloudinary.uploader.upload(imageFile.path, {
+        folder: "users",
+      });
+
+      // Save new image details
+      user.profileImage = result.secure_url;
+      user.profileImagePublicId = result.public_id;
+    }
+
+    // Save the updated user
     await user.save();
 
     res.status(200).json(
@@ -123,7 +146,8 @@ export const updateUser = async (req, res, next) => {
         userId: user._id,
         name: user.name,
         email: user.email,
-        status: user.status,
+        bio: user.bio,
+        profileImage: user.profileImage, // Include updated profile image in response
       })
     );
   } catch (error) {
@@ -136,10 +160,18 @@ export const deleteUser = async (req, res, next) => {
     const { userId } = req.params;
 
     // Find and delete the user
-    const user = await User.findByIdAndDelete(userId);
+    const user = await User.findById(userId);
     if (!user) {
       throw new CustomError("User not found", 404);
     }
+
+    // If the user has a profile image in Cloudinary, delete it
+    if (user.profileImagePublicId) {
+      await cloudinary.uploader.destroy(user.profileImagePublicId);
+    }
+
+    // Delete the user from the database
+    await User.findByIdAndDelete(userId);
 
     res.status(200).json(
       response(200, true, "User deleted successfully", {
