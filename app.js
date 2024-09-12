@@ -71,7 +71,9 @@ export default async (req, res) => {
       await mongoose.connect(process.env.MONGO_DRIVER, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
-        serverSelectionTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 5000, // Timeout after 5s
+        connectTimeoutMS: 10000, // Connection timeout of 10s
+        socketTimeoutMS: 45000,
       });
       console.log("Connected to MongoDB");
     }

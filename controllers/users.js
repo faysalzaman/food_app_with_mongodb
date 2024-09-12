@@ -1,10 +1,11 @@
 import bcrypt from "bcryptjs";
 import User from "../models/users.js";
-
 import response from "../utils/response.js";
 import CustomError from "../utils/error.js";
 import JWT from "../utils/jwt.js";
+import { v2 as cloudinary } from "cloudinary";
 
+// Create a new user
 export const createUser = async (req, res, next) => {
   try {
     const { name, email, password, bio } = req.body;
@@ -26,13 +27,14 @@ export const createUser = async (req, res, next) => {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create the new user object with the image path if available
+    // Create the new user object with Cloudinary image info if available
     const user = new User({
       name,
       email,
       password: hashedPassword,
       bio,
-      profileImage: imageFile ? imageFile.path : null, // Save image path
+      profileImage: imageFile ? imageFile.path : null, // Cloudinary URL
+      profileImagePublicId: imageFile ? imageFile.filename : null, // Cloudinary public_id
     });
 
     // Save the user to the database
@@ -44,7 +46,7 @@ export const createUser = async (req, res, next) => {
         name,
         email,
         bio,
-        profileImage: imageFile ? imageFile.path : null, // Include image path in response
+        profileImage: imageFile ? imageFile.path : null, // Include Cloudinary image URL in response
       })
     );
   } catch (error) {
@@ -52,18 +54,17 @@ export const createUser = async (req, res, next) => {
   }
 };
 
+// User login
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email: email });
-
     if (!user) {
       throw new CustomError("Invalid credentials", 401);
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
       throw new CustomError("Invalid credentials", 401);
     }
@@ -81,11 +82,10 @@ export const login = async (req, res, next) => {
   }
 };
 
-// get all the user;
+// Get all users
 export const getAllUsers = async (req, res, next) => {
   try {
     const users = await User.find();
-
     res
       .status(200)
       .json(response(200, true, "Users retrieved successfully", users));
@@ -94,10 +94,14 @@ export const getAllUsers = async (req, res, next) => {
   }
 };
 
+// Update user
 export const updateUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const { name, email, password, status } = req.body;
+    const { name, email, password, bio } = req.body;
+
+    // Access the uploaded file (if any)
+    const imageFile = req.file;
 
     // Find the user
     const user = await User.findById(userId);
@@ -108,7 +112,7 @@ export const updateUser = async (req, res, next) => {
     // Update user fields if they are provided
     if (name) user.name = name;
     if (email) user.email = email;
-    if (status) user.status = status;
+    if (bio) user.bio = bio;
 
     // If password is being updated, hash it before saving
     if (password) {
@@ -116,6 +120,24 @@ export const updateUser = async (req, res, next) => {
       user.password = hashedPassword;
     }
 
+    // Handle image updates
+    if (imageFile) {
+      // If the user already has an image, delete the old one from Cloudinary
+      if (user.profileImagePublicId) {
+        try {
+          await cloudinary.uploader.destroy(user.profileImagePublicId);
+        } catch (error) {
+          console.error("Failed to delete old image from Cloudinary:", error);
+          // Optionally handle this error (e.g., send a response to the client)
+        }
+      }
+
+      // Save the new image details from multer-storage-cloudinary
+      user.profileImage = imageFile.path; // Cloudinary URL
+      user.profileImagePublicId = imageFile.filename; // Cloudinary public_id
+    }
+
+    // Save the updated user
     await user.save();
 
     res.status(200).json(
@@ -123,7 +145,8 @@ export const updateUser = async (req, res, next) => {
         userId: user._id,
         name: user.name,
         email: user.email,
-        status: user.status,
+        bio: user.bio,
+        profileImage: user.profileImage, // Include updated profile image in response
       })
     );
   } catch (error) {
@@ -131,15 +154,28 @@ export const updateUser = async (req, res, next) => {
   }
 };
 
+// Delete user
 export const deleteUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
 
     // Find and delete the user
-    const user = await User.findByIdAndDelete(userId);
+    const user = await User.findById(userId);
     if (!user) {
       throw new CustomError("User not found", 404);
     }
+
+    // If the user has a profile image in Cloudinary, delete it
+    if (user.profileImagePublicId) {
+      try {
+        await cloudinary.uploader.destroy(user.profileImagePublicId);
+      } catch (error) {
+        console.error("Failed to delete image from Cloudinary:", error);
+      }
+    }
+
+    // Delete the user from the database
+    await User.findByIdAndDelete(userId);
 
     res.status(200).json(
       response(200, true, "User deleted successfully", {
