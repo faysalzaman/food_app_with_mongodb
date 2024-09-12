@@ -1,5 +1,5 @@
 import express from "express";
-import multerUpload from "../config/multer.js";
+import multerUpload from "../config/multer_cloudinary.js";
 import {
   createFoodItem,
   getAllFoodItems,
