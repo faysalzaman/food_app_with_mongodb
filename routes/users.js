@@ -1,4 +1,5 @@
 import express from "express";
+import multerUpload from "../config/multer.js";
 import {
   createUser,
   login,
@@ -10,7 +11,7 @@ import {
 const router = express.Router();
 
 // Route to create a user
-router.post("/v1/createUser", createUser);
+router.post("/v1/createUser", multerUpload.single("image"), createUser);
 
 // Route for user login
 router.post("/v1/login", login);

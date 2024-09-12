@@ -1,4 +1,5 @@
 import express from "express";
+import multerUpload from "../config/multer.js";
 import {
   createFoodItem,
   getAllFoodItems,
@@ -10,7 +11,7 @@ import {
 const router = express.Router();
 
 // Create a new food item
-router.post("/v1/foodItems", createFoodItem);
+router.post("/v1/foodItems", multerUpload.single("image"), createFoodItem);
 
 // Get all food items
 router.get("/v1/foodItems", getAllFoodItems);

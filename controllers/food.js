@@ -3,7 +3,6 @@ import CustomError from "../utils/error.js";
 import response from "../utils/response.js";
 import Category from "../models/category.js";
 
-// Create Food Item
 export const createFoodItem = async (req, res, next) => {
   try {
     const {
@@ -12,11 +11,14 @@ export const createFoodItem = async (req, res, next) => {
       price,
       category,
       type,
-      imageUrl,
       available,
       isVegetarian,
     } = req.body;
 
+    // Access the uploaded file (if any)
+    const imageFile = req.file;
+
+    // Validation: Check if all required fields are provided
     if (
       !name ||
       !description ||
@@ -31,7 +33,7 @@ export const createFoodItem = async (req, res, next) => {
       );
     }
 
-    // Check whether this category exists in the database, if not, throw an error
+    // Validate the existence of the category
     const categoryExists = await Category.findById(category);
     if (!categoryExists) {
       throw new CustomError("Category not found", 404);
@@ -49,19 +51,22 @@ export const createFoodItem = async (req, res, next) => {
       );
     }
 
+    // Create a new food item
     const foodItem = new FoodItem({
       name,
       description,
       price,
       category,
       type,
-      imageUrl,
+      imageUrl: imageFile ? imageFile.path : null, // Store the image path if the file was uploaded
       available,
       isVegetarian,
     });
 
+    // Save the food item to the database
     await foodItem.save();
 
+    // Respond with success
     res
       .status(201)
       .json(response(201, true, "Food item created successfully", foodItem));

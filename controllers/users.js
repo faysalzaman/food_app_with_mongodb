@@ -9,31 +9,42 @@ export const createUser = async (req, res, next) => {
   try {
     const { name, email, password, status } = req.body;
 
+    // Access the uploaded file (if any)
+    const imageFile = req.file;
+
+    // Validate that the required fields are provided
+    if (!name || !email || !password) {
+      throw new CustomError("Please provide all required fields", 400);
+    }
+
+    // Check if the user already exists
     const userExist = await User.findOne({ email: email });
     if (userExist) {
       throw new CustomError("User already exists", 400);
     }
 
-    if (!name || !email || !password) {
-      throw new CustomError("Please provide all required fields", 400);
-    }
-
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // Create the new user object with the image path if available
     const user = new User({
       name,
       email,
       password: hashedPassword,
       status,
+      image: imageFile ? imageFile.path : null, // Save image path
     });
 
+    // Save the user to the database
     await user.save();
 
+    // Respond with success
     res.status(201).json(
       response(201, true, "User created successfully", {
         name,
         email,
         status,
+        image: imageFile ? imageFile.path : null, // Include image path in response
       })
     );
   } catch (error) {

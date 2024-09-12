@@ -2,24 +2,29 @@ import Category from "../models/category.js";
 import CustomError from "../utils/error.js";
 import response from "../utils/response.js";
 
-// Create Category
 export const createCategory = async (req, res, next) => {
   try {
     const { name, description } = req.body;
 
+    // Access the uploaded file (if any)
+    const imageFile = req.file;
+
+    // Validation: Check if the required fields are provided
     if (!name) {
       throw new CustomError("Name is required", 400);
     }
 
-    console.log("Hello");
-
+    // Create a new category object with the image path if available
     const category = new Category({
       name,
       description,
+      imageUrl: imageFile ? imageFile.path : null, // Store image path if the file was uploaded
     });
 
+    // Save the category to the database
     await category.save();
 
+    // Respond with success
     res
       .status(201)
       .json(response(201, true, "Category created successfully", category));
