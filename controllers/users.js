@@ -32,7 +32,7 @@ export const createUser = async (req, res, next) => {
       email,
       password: hashedPassword,
       bio,
-      image: imageFile ? imageFile.path : null, // Save image path
+      profileImage: imageFile ? imageFile.path : null, // Save image path
     });
 
     // Save the user to the database
@@ -44,7 +44,7 @@ export const createUser = async (req, res, next) => {
         name,
         email,
         bio,
-        image: imageFile ? imageFile.path : null, // Include image path in response
+        profileImage: imageFile ? imageFile.path : null, // Include image path in response
       })
     );
   } catch (error) {
