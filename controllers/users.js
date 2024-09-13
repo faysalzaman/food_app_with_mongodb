@@ -5,7 +5,6 @@ import CustomError from "../utils/error.js";
 import JWT from "../utils/jwt.js";
 import { v2 as cloudinary } from "cloudinary";
 
-// Create a new user
 export const createUser = async (req, res, next) => {
   try {
     const { name, email, password, bio } = req.body;
@@ -54,7 +53,7 @@ export const createUser = async (req, res, next) => {
   }
 };
 
-// User login
+// User login Api
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
