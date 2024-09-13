@@ -24,6 +24,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  profileImagePublicId: {
+    type: String, // This will store the Cloudinary public_id for image deletion
+  },
 });
 
 export default mongoose.model("User", userSchema);
