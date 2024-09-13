@@ -17,7 +17,7 @@ router.post("/v1/createUser", multerUpload.single("image"), createUser);
 router.post("/v1/login", login);
 
 // Route to update a user by userId
-router.put("/v1/users/:userId", updateUser);
+router.put("/v1/users/:userId", multerUpload.single("image"), updateUser);
 
 // Route to delete a user by userId
 router.delete("/v1/users/:userId", deleteUser);
