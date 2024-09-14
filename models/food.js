@@ -26,6 +26,10 @@ const foodSchema = new mongoose.Schema({
   imageUrl: {
     type: String,
   },
+  imagePublicId: {
+    // Add this field to store the Cloudinary public_id
+    type: String,
+  },
   available: {
     type: Boolean,
     default: true,

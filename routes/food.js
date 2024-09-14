@@ -1,28 +1,28 @@
 import express from "express";
-import multerUpload from "../config/multer_cloudinary.js";
+import multerUpload from "../config/multer_cloudinary.js"; // Import multer configuration
 import {
   createFoodItem,
-  getAllFoodItems,
-  getFoodItemById,
   updateFoodItem,
   deleteFoodItem,
+  getAllFoodItems,
+  getFoodItemById,
 } from "../controllers/food.js";
 
 const router = express.Router();
 
-// Create a new food item
-router.post("/v1/foodItems", multerUpload.single("image"), createFoodItem);
+// Create a food item
+router.post("/v1/food", multerUpload.single("image"), createFoodItem);
+
+// Update a food item
+router.put("/v1/food/:foodId", multerUpload.single("image"), updateFoodItem);
+
+// Delete a food item
+router.delete("/v1/food/:foodId", deleteFoodItem);
 
 // Get all food items
-router.get("/v1/foodItems", getAllFoodItems);
+router.get("/v1/food", getAllFoodItems);
 
-// Get a food item by ID
-router.get("/v1/foodItems/:foodId", getFoodItemById);
-
-// Update a food item by ID
-router.put("/v1/foodItems/:foodId", updateFoodItem);
-
-// Delete a food item by ID
-router.delete("/v1/foodItems/:foodId", deleteFoodItem);
+// Get food item by id
+router.get("/v1/food/:foodId", getFoodItemById);
 
 export default router;

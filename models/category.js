@@ -12,6 +12,10 @@ const categorySchema = new mongoose.Schema({
   imageUrl: {
     type: String,
   },
+  imagePublicId: {
+    // Adding the Cloudinary public_id for image management
+    type: String,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
