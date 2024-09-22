@@ -172,13 +172,11 @@ export const deleteFoodItem = async (req, res, next) => {
     // Delete the food item from the database
     await FoodItem.findByIdAndDelete(foodId);
 
-    res
-      .status(200)
-      .json(
-        response(200, true, "Food item deleted successfully", {
-          foodId: foodId,
-        })
-      );
+    res.status(200).json(
+      response(200, true, "Food item deleted successfully", {
+        foodId: foodId,
+      })
+    );
   } catch (error) {
     next(error);
   }
@@ -187,7 +185,13 @@ export const deleteFoodItem = async (req, res, next) => {
 // Get All Food Items
 export const getAllFoodItems = async (req, res, next) => {
   try {
-    const foodItems = await FoodItem.find().populate("category");
+    let foodItems;
+    if (req.query.field) {
+      const { field } = req.query;
+      foodItems = await FoodItem.findByField(field);
+    } else {
+      foodItems = await FoodItem.sortAscending();
+    }
 
     res
       .status(200)
@@ -213,6 +217,25 @@ export const getFoodItemById = async (req, res, next) => {
     res
       .status(200)
       .json(response(200, true, "Food item retrieved successfully", foodItem));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAvailableFoods = async (req, res, next) => {
+  try {
+    const foodItems = FoodItem.availableFoods().populate("category");
+
+    res
+      .status(200)
+      .json(
+        response(
+          200,
+          true,
+          "Available food items retrieved successfully",
+          foodItems
+        )
+      );
   } catch (error) {
     next(error);
   }

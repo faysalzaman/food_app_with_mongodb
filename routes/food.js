@@ -6,6 +6,7 @@ import {
   deleteFoodItem,
   getAllFoodItems,
   getFoodItemById,
+  getAvailableFoods,
 } from "../controllers/food.js";
 
 const router = express.Router();
@@ -24,5 +25,8 @@ router.get("/v1/food", getAllFoodItems);
 
 // Get food item by id
 router.get("/v1/food/:foodId", getFoodItemById);
+
+// Get available foods
+router.get("/v1/food/available", getAvailableFoods);
 
 export default router;

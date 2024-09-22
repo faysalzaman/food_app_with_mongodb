@@ -47,4 +47,20 @@ const foodSchema = new mongoose.Schema({
   },
 });
 
+foodSchema.static.availableFoods = async function () {
+  return this.find({ available: true });
+};
+
+foodSchema.statics.sortAscending = async function () {
+  return this.find().sort({ _id: 1 }).populate("category");
+};
+
+foodSchema.statics.sortDescending = async function () {
+  return this.find().sort({ _id: -1 }).populate("category");
+};
+
+foodSchema.statics.findByField = async function (field) {
+  return this.find().select(field);
+};
+
 export default mongoose.model("FoodItem", foodSchema);
