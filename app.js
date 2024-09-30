@@ -13,6 +13,9 @@ import userRoutes from "./routes/users.js";
 import categoryRoutes from "./routes/category.js";
 import foodRoutes from "./routes/food.js";
 
+// prisma wala
+import userRoutesFromPrisma from "./routes/prisma/users.js";
+
 dotenv.config();
 
 const app = express();
@@ -51,6 +54,9 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/user", userRoutes);
 app.use("/api/food", foodRoutes);
 app.use("/api/category", categoryRoutes);
+
+// prisma Routes
+app.use("/api/prisma/user", userRoutesFromPrisma);
 
 // Error Handling for 404 Not Found
 app.use((req, res, next) => {

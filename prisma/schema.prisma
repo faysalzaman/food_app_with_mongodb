@@ -24,3 +24,38 @@ model User {
 } 
 
 
+model FoodItem {
+  id             String   @id @default(uuid()) // Use UUID for unique IDs in MySQL
+  name           String
+  description    String
+  price          Float
+  categoryId     String   // Foreign key to Category
+  type           String
+  imageUrl       String?
+  imagePublicId  String?
+  available      Boolean  @default(true)
+  isVegetarian   Boolean
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime?
+
+  // Relation to Category
+  category       Category @relation(fields: [categoryId], references: [id])
+
+  @@index([categoryId])
+}
+
+
+model Category {
+  id            String     @id @default(uuid()) // Use UUID for MySQL
+  name          String     @unique
+  description   String?
+  imageUrl      String?
+  imagePublicId String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime?
+
+  // Relation to FoodItem
+  foods         FoodItem[]
+}
+
+
